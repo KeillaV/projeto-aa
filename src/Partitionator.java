@@ -2,47 +2,33 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Partitionator {
-	// Particiona o conjunto `S` em dois subconjuntos, `S1` e `S2`, de modo que o
-	// diferença entre a soma dos elementos em `S1` e a soma
-	// dos elementos em `S2` é minimizado
-	public static int findMinAbsDiff(int[] S, int n, int S1, int S2, Map<String, Integer> lookup) {
-		// Caso base: se a lista ficar vazia, retorna o absoluto
-		// diferença entre os dois conjuntos
-		if (n < 0) {
-			return Math.abs(S1 - S2);
+	
+	public static int findMinPartition(int[] array, int index, int sub01, int sub02, Map<String, Integer> solutions) {
+		
+		if (index < 0) {
+			return Math.abs(sub01 - sub02);
 		}
 
-		// Construir uma chave de mapa exclusiva a partir de elementos dinâmicos da
-		// entrada.
-		// Observe que podemos identificar exclusivamente o subproblema apenas com `n` e
-		// `S1`,
-		// como `S2` nada mais é que `S-S1`, onde `S` é a soma de todos os elementos
-		String key = n + "|" + S1;
+		String key = index + "|" + sub01 + "|" + sub02;
+		
+		if (!solutions.containsKey(key)) {
+			
+			int includeSub01 = findMinPartition(array, index - 1, sub01 + array[index], sub02, solutions);
 
-		// Se o subproblema for visto pela primeira vez, resolva-o e
-		// armazena seu resultado em um mapa
-		if (!lookup.containsKey(key)) {
-			// Caso 1. Incluir o item atual no subconjunto `S1` e repetir
-			// para os itens restantes `n-1`
-			int inc = findMinAbsDiff(S, n - 1, S1 + S[n], S2, lookup);
+			int includeSub02 = findMinPartition(array, index - 1, sub01, sub02 + array[index], solutions);
 
-			// Caso 2. Excluir o item atual do subconjunto `S1` e retornar para
-			// os itens restantes `n-1`
-			int exc = findMinAbsDiff(S, n - 1, S1, S2 + S[n], lookup);
-
-			lookup.put(key, Integer.min(inc, exc));
+			solutions.put(key, Integer.min(includeSub01, includeSub02));
 		}
 
-		return lookup.get(key);
+		return solutions.get(key);
 	}
 
 	public static void main(String[] args) {
-		// Entrada: um conjunto de itens
-		int[] S = { 10, 20, 15, 5, 25 };
+		
+		int[] S = { 10, 5, 14};
 
-		// cria um mapa para armazenar soluções para subproblemas
-		Map<String, Integer> lookup = new HashMap<>();
+		Map<String, Integer> solutions = new HashMap<>();
 
-		System.out.println("The minimum difference is " + findMinAbsDiff(S, S.length - 1, 0, 0, lookup));
+		System.out.println("A diferença de partição mínima é: " + findMinPartition(S, S.length - 1, 0, 0, solutions));
 	}
 }
